@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Puzzle, Target, Star } from "lucide-react";
+import { BookOpen, Puzzle, Target, Star, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import octavioWaving from "@/assets/octavio-waving.png";
 
 const MISSIONS = [
@@ -45,29 +48,89 @@ const MISSIONS = [
 
 const Menu = () => {
   const navigate = useNavigate();
-  const username = sessionStorage.getItem("username") || "Super Lector";
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("Super Lector");
+
+  useEffect(() => {
+    // Check authentication and get user profile
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        // Get user profile
+        supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              setUserName(data.full_name);
+            }
+            setLoading(false);
+          });
+      }
+    });
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error al cerrar sesión",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      navigate("/");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-tropical opacity-90" />
+        <p className="text-2xl font-fredoka text-white z-10">Cargando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 py-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header with Octavio */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img 
-              src={octavioWaving} 
-              alt="Octavio" 
-              className="w-32 h-32 md:w-40 md:h-40 animate-float drop-shadow-2xl"
-            />
+        {/* Header with Octavio and Logout */}
+        <div className="mb-8">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="bg-white/90 hover:bg-white border-2 border-primary/40 rounded-xl"
+            >
+              <LogOut className="h-4 w-4 mr-2 text-primary" />
+              <span className="font-fredoka text-primary">Salir</span>
+            </Button>
           </div>
-          
-          <Card className="inline-block bg-primary/10 border-4 border-primary/30 rounded-2xl p-6 backdrop-blur-sm">
-            <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">
-              ¡Hola, {username}! 🌟
-            </h2>
-            <p className="text-lg md:text-xl text-foreground/80">
-              ¡Bravo! Tienes estas 4 misiones disponibles:
-            </p>
-          </Card>
+
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <img 
+                src={octavioWaving} 
+                alt="Octavio" 
+                className="w-32 h-32 md:w-40 md:h-40 animate-float drop-shadow-2xl"
+              />
+            </div>
+            
+            <Card className="inline-block bg-primary/10 border-4 border-primary/30 rounded-2xl p-6 backdrop-blur-sm">
+              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">
+                ¡Hola, {userName}! 🌟
+              </h2>
+              <p className="text-lg md:text-xl text-foreground/80">
+                ¡Bravo! Tienes estas 4 misiones disponibles:
+              </p>
+            </Card>
+          </div>
         </div>
 
         {/* AI Recommendation */}
@@ -118,17 +181,6 @@ const Menu = () => {
               </Card>
             );
           })}
-        </div>
-
-        {/* Back button */}
-        <div className="mt-8 text-center">
-          <Button
-            onClick={() => navigate("/")}
-            variant="outline"
-            className="border-2 border-primary/50 text-primary hover:bg-primary/10 rounded-xl font-bold px-8"
-          >
-            ← Volver al inicio
-          </Button>
         </div>
       </div>
     </div>
