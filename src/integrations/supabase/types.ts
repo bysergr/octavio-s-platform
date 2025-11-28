@@ -14,7 +14,206 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          description: string | null
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          description?: string | null
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          description?: string | null
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnostic_results: {
+        Row: {
+          completed_at: string
+          correct_answers: number
+          id: string
+          recommended_level: number
+          score_percentage: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          correct_answers: number
+          id?: string
+          recommended_level: number
+          score_percentage: number
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          correct_answers?: number
+          id?: string
+          recommended_level?: number
+          score_percentage?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          level: number
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name: string
+          id: string
+          level?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          level?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reading_activities: {
+        Row: {
+          activity_type: string
+          completed: boolean
+          created_at: string
+          id: string
+          score: number | null
+          story_title: string
+          time_spent_minutes: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          completed?: boolean
+          created_at?: string
+          id?: string
+          score?: number | null
+          story_title: string
+          time_spent_minutes?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          completed?: boolean
+          created_at?: string
+          id?: string
+          score?: number | null
+          story_title?: string
+          time_spent_minutes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          created_at: string
+          current_streak_days: number
+          daily_challenges_completed: number
+          games_played: number
+          id: string
+          last_activity_date: string | null
+          longest_streak_days: number
+          reading_level: number
+          stories_completed: number
+          total_reading_time_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak_days?: number
+          daily_challenges_completed?: number
+          games_played?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak_days?: number
+          reading_level?: number
+          stories_completed?: number
+          total_reading_time_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak_days?: number
+          daily_challenges_completed?: number
+          games_played?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak_days?: number
+          reading_level?: number
+          stories_completed?: number
+          total_reading_time_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
