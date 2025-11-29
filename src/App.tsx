@@ -3,14 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
 import Diagnosis from "./pages/Diagnosis";
 import Menu from "./pages/Menu";
 import Reading from "./pages/Reading";
 import Progress from "./pages/Progress";
-import ComingSoon from "./pages/ComingSoon";
+import DailyChallenge from "./pages/DailyChallenge";
+import Games from "./pages/Games";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +28,8 @@ const App = () => (
           <Route path="/menu" element={<Menu />} />
           <Route path="/reading" element={<Reading />} />
           <Route path="/progress" element={<Progress />} />
-          <Route path="/games" element={<ComingSoon />} />
-          <Route path="/daily-challenge" element={<ComingSoon />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/daily-challenge" element={<DailyChallenge />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Lightbulb } from "lucide-react";
 import octavioThinking from "@/assets/octavio-thinking.png";
 import octavioCelebrating from "@/assets/octavio-celebrating.png";
+import { askTutor } from "@/integrations/ai/tutor";
 
 const STORY = {
   title: "El Tesoro del Jardín Secreto",
@@ -19,18 +20,22 @@ En el centro del jardín había un árbol enorme con ramas que parecían brazos 
   pausePoint: "¿Qué crees que había dentro de la caja?",
   vocabulary: {
     word: "oxidado",
-    question: "¿Sabes qué significa la palabra 'oxidado'?"
-  }
+    question: "¿Sabes qué significa la palabra 'oxidado'?",
+  },
 };
 
 const Reading = () => {
-  const [phase, setPhase] = useState<"intro" | "reading" | "vocabulary" | "pause" | "complete">("intro");
+  const [phase, setPhase] = useState<
+    "intro" | "reading" | "vocabulary" | "pause" | "complete"
+  >("intro");
   const [answer, setAnswer] = useState("");
   const [showHint, setShowHint] = useState(false);
+  const [hintLoading, setHintLoading] = useState(false);
+  const [hintText, setHintText] = useState("");
   const navigate = useNavigate();
 
   const handleStart = () => setPhase("reading");
-  
+
   const handleContinue = () => {
     if (phase === "reading") {
       setPhase("vocabulary");
@@ -49,19 +54,20 @@ const Reading = () => {
         return (
           <div className="space-y-8">
             <div className="flex justify-center">
-              <img 
-                src={octavioThinking} 
-                alt="Octavio" 
+              <img
+                src={octavioThinking}
+                alt="Octavio"
                 className="w-48 h-48 animate-float drop-shadow-2xl"
               />
             </div>
-            
+
             <div className="bg-primary/10 border-4 border-primary/30 rounded-2xl p-8 space-y-4">
               <p className="text-2xl md:text-3xl font-bold text-foreground">
                 ¡Mira este cuento divertido! 📖
               </p>
               <p className="text-xl text-foreground/80">
-                Se llama <span className="font-black text-primary">"{STORY.title}"</span>
+                Se llama{" "}
+                <span className="font-black text-primary">"{STORY.title}"</span>
               </p>
               <p className="text-lg text-muted-foreground">
                 Solo te tomará unos 5 minutos. ¿Listo?
@@ -92,7 +98,7 @@ const Reading = () => {
             <h2 className="text-3xl md:text-4xl font-black text-center text-primary mb-6">
               {STORY.title}
             </h2>
-            
+
             <Card className="bg-card/80 border-2 border-primary/20 rounded-2xl p-6 md:p-8">
               <p className="text-lg md:text-xl leading-relaxed whitespace-pre-line text-foreground/90">
                 {STORY.content}
@@ -112,9 +118,9 @@ const Reading = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-center">
-              <img 
-                src={octavioThinking} 
-                alt="Octavio" 
+              <img
+                src={octavioThinking}
+                alt="Octavio"
                 className="w-40 h-40 animate-bounce-gentle drop-shadow-xl"
               />
             </div>
@@ -127,7 +133,8 @@ const Reading = () => {
                 {STORY.vocabulary.question}
               </p>
               <p className="text-lg text-muted-foreground mt-2">
-                Escribe la definición si la sabes, o escribe <span className="font-bold text-secondary">'PISTA'</span>
+                Escribe la definición si la sabes, o escribe{" "}
+                <span className="font-bold text-secondary">'PISTA'</span>
               </p>
             </div>
 
@@ -141,13 +148,34 @@ const Reading = () => {
             {answer.toUpperCase() === "PISTA" && (
               <div className="bg-secondary/10 border-2 border-secondary/30 rounded-xl p-4">
                 <p className="text-secondary font-bold">
-                  💡 Pista: Cuando algo está oxidado, significa que el metal se ha puesto viejo y con manchas café por estar mucho tiempo expuesto al aire y la humedad.
+                  {hintLoading
+                    ? "Generando pista..."
+                    : hintText ||
+                      "💡 Escribe 'PISTA' y presiona 'Siguiente' para obtener ayuda."}
                 </p>
               </div>
             )}
 
             <Button
-              onClick={handleContinue}
+              onClick={async () => {
+                if (answer.trim().toUpperCase() === "PISTA") {
+                  setHintLoading(true);
+                  try {
+                    const data = await askTutor<{ text: string }>("hint", {
+                      story: STORY.content,
+                    });
+                    setHintText(data.text);
+                  } catch {
+                    setHintText(
+                      "Cuando algo está oxidado, el metal se ha puesto viejo por el aire y la humedad."
+                    );
+                  } finally {
+                    setHintLoading(false);
+                  }
+                  return;
+                }
+                handleContinue();
+              }}
               disabled={!answer.trim()}
               className="w-full h-14 text-xl font-black rounded-2xl bg-gradient-to-r from-success to-success/80 disabled:opacity-50"
             >
@@ -160,9 +188,9 @@ const Reading = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-center">
-              <img 
-                src={octavioThinking} 
-                alt="Octavio" 
+              <img
+                src={octavioThinking}
+                alt="Octavio"
                 className="w-40 h-40 animate-float drop-shadow-xl"
               />
             </div>
@@ -171,9 +199,7 @@ const Reading = () => {
               <p className="text-2xl font-bold text-foreground mb-4">
                 ¡Detente y piensa! 🤔
               </p>
-              <p className="text-xl text-foreground/90">
-                {STORY.pausePoint}
-              </p>
+              <p className="text-xl text-foreground/90">{STORY.pausePoint}</p>
               <p className="text-lg text-muted-foreground mt-2">
                 Escribe en una frase lo que piensas.
               </p>
@@ -188,7 +214,22 @@ const Reading = () => {
 
             {!showHint && (
               <Button
-                onClick={() => setShowHint(true)}
+                onClick={async () => {
+                  setShowHint(true);
+                  setHintLoading(true);
+                  try {
+                    const data = await askTutor<{ text: string }>("hint", {
+                      story: STORY.content,
+                    });
+                    setHintText(data.text);
+                  } catch {
+                    setHintText(
+                      "Piensa en los objetos que podrían ser especiales o tener un significado para Luna."
+                    );
+                  } finally {
+                    setHintLoading(false);
+                  }
+                }}
                 variant="outline"
                 className="w-full border-2 border-secondary/50 text-secondary hover:bg-secondary/10 rounded-xl font-bold"
               >
@@ -200,7 +241,10 @@ const Reading = () => {
             {showHint && (
               <div className="bg-secondary/10 border-2 border-secondary/30 rounded-xl p-4">
                 <p className="text-secondary font-bold">
-                  💡 Pista: Piensa en qué tipo de cosas especiales podrían estar en una caja con tu nombre. ¿Sería un regalo? ¿Un tesoro? ¿Un mensaje?
+                  {hintLoading
+                    ? "Pensando..."
+                    : hintText ||
+                      "💡 Piensa en qué tipo de cosas especiales podrían estar en una caja con tu nombre."}
                 </p>
               </div>
             )}
@@ -219,9 +263,9 @@ const Reading = () => {
         return (
           <div className="space-y-8 text-center">
             <div className="flex justify-center">
-              <img 
-                src={octavioCelebrating} 
-                alt="Octavio celebrando" 
+              <img
+                src={octavioCelebrating}
+                alt="Octavio celebrando"
                 className="w-56 h-56 animate-bounce-gentle drop-shadow-2xl"
               />
             </div>

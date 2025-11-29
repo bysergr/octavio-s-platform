@@ -1,73 +1,167 @@
-# Welcome to your Lovable project
+Aquí tienes **todo el texto completamente formateado en Markdown (MD)**, limpio, estructurado y listo para usar:
 
-## Project info
+---
 
-**URL**: https://lovable.dev/projects/91b8354a-9cb4-48fa-af8d-1a7307e65934
+# 📚 **Proyecto: Pilas con la Lectura**
 
-## How can I edit this code?
+**Autor:** Octavio
 
-There are several ways of editing your application.
+## 📝 **Contexto**
 
-**Use Lovable**
+En Colombia, un número significativo de niños entre segundo y quinto de primaria enfrenta dificultades en el desarrollo de la lectura crítica, debido a la baja calidad educativa en ciertos territorios, la falta de recursos pedagógicos adecuados y el acceso limitado a docentes capacitados.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/91b8354a-9cb4-48fa-af8d-1a7307e65934) and start prompting.
+Estas brechas afectan la comprensión lectora, el pensamiento analítico y el rendimiento académico en otras áreas. Ante este panorama, se requiere diseñar soluciones innovadoras y accesibles que fortalezcan las competencias de lectura crítica, aprovechando el potencial de la inteligencia artificial para brindar acompañamiento pedagógico personalizado y escalable.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🎯 **Objetivos Específicos**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+* Diseñar e implementar un tutor virtual basado en IA que acompañe a los niños de 2.° a 5.° en el proceso de comprensión y análisis de textos, con actividades interactivas y adaptadas a su nivel.
+* Promover el desarrollo de habilidades de lectura crítica mediante ejercicios progresivos que fomenten la interpretación, inferencia, reflexión y argumentación.
+* Garantizar la accesibilidad y pertinencia pedagógica de la herramienta, adaptándola al contexto colombiano y a las necesidades de niños con recursos educativos limitados.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🧩 **Resultados Esperados**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+* Desarrollo de un prototipo funcional de tutor virtual con IA capaz de interactuar en lenguaje natural.
+* Mejora en las competencias de lectura crítica de los estudiantes mediante ejercicios y pruebas.
+* Disponibilidad de una solución educativa gratuita que contribuya a cerrar brechas educativas en zonas vulnerables de Colombia.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 🚀 **Flujo de Usuario**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Cada usuario debe crear una cuenta donde se solicita:
 
-**Edit a file directly in GitHub**
+* **Nombre o username**
+* **Imagen (opcional)**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Cada usuario tendrá un **ELO**, que aumentará a medida que avance y realice actividades.
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# 🤖 **Flujo de Experiencia de Lectura Adaptativa con IA**
 
-## What technologies are used for this project?
+Este es el recorrido completo que vive un niño al interactuar con el tutor virtual.
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 1. 🚪 **Inicio / Acceso y Diagnóstico**
 
-## How can I deploy this project?
+El punto de entrada a la plataforma.
 
-Simply open [Lovable](https://lovable.dev/projects/91b8354a-9cb4-48fa-af8d-1a7307e65934) and click on Share -> Publish.
+* El niño entra a la plataforma (web).
+* Pantalla de bienvenida simple con botón: **“Empezar a leer”**.
+* **Diagnóstico rápido inicial:**
 
-## Can I connect a custom domain to my Lovable project?
+  * 2–3 preguntas cortas para estimar el nivel de lectura.
+  * La IA detecta comprensión básica.
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 2. 🧭 **Selección de Actividad**
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Un menú visual, intuitivo y amigable:
+
+**Opciones Disponibles:**
+
+* 📘 **Leer un cuento corto** (Acceso a la biblioteca)
+* 🧩 **Actividades interactivas** (Habilidades específicas)
+* 🎯 **Retos del día** (Misiones para ganar recompensas)
+* ⭐ **Mi progreso** (Logros e insignias)
+
+**Sugerencia Inteligente:**
+La IA recomienda la mejor actividad según el desempeño previo.
+
+---
+
+## 3. 📖 **Lectura Guiada por el Tutor Virtual**
+
+La parte central de la experiencia.
+
+### A. **Presentación del Cuento**
+
+* Título
+* Ilustración
+* Duración estimada (1–3 minutos)
+* Botón **“Leer con ayuda”**
+
+### B. **Lectura Dinámica**
+
+El niño puede leer en voz alta (opcional) o en silencio.
+
+| Característica                   | Acción de la IA                                       |
+| -------------------------------- | ----------------------------------------------------- |
+| Detección de vocabulario difícil | Explica con definiciones simples.                     |
+| Interacción proactiva            | Preguntas cortas como “¿Qué crees que pasará ahora?”. |
+
+### C. **Pausa Reflexiva**
+
+Momentos breves para fomentar el pensamiento crítico.
+
+**Ejemplos:**
+
+* “¿Por qué crees que el personaje actuó así?”
+* “¿Qué habrías hecho tú en esa situación?”
+
+---
+
+## 4. 🧠 **Actividades Interactivas (Post-lectura)**
+
+Ejercicios basados en los 4 pilares de la lectura crítica:
+
+| Pilar              | Foco                | Actividades                                  |
+| ------------------ | ------------------- | -------------------------------------------- |
+| **Interpretación** | ¿Qué dice el texto? | Seleccionar idea principal, ordenar eventos. |
+| **Inferencia**     | ¿Qué quiere decir?  | Deducir características, completar frases.   |
+| **Reflexión**      | ¿Qué pienso yo?     | Responder preguntas abiertas.                |
+| **Argumentación**  | ¿Cómo lo justifico? | Elegir opción y explicarla con guía de IA.   |
+
+---
+
+## 5. 🗣️ **Interacción con el Tutor Virtual**
+
+El tutor funciona como un compañero de estudio:
+
+* Lenguaje sencillo y amigable.
+* Mensajes motivadores constantes.
+* Manejo del error:
+
+  * Da pistas antes de mostrar la respuesta correcta.
+  * Proporciona ejemplos simples.
+
+---
+
+## 6. 🏆 **Retroalimentación Inmediata**
+
+Al finalizar una sesión, el niño recibe:
+
+* ✅ **Tres fortalezas** (ej: “Eres muy bueno encontrando ideas importantes”).
+* 📝 **Una recomendación** clara para aprender.
+* 🌟 **Recompensa gamificada:** estrellas o insignias según su esfuerzo.
+
+---
+
+## 7. 📈 **Progreso Gamificado**
+
+Panel visual para mantener la motivación:
+
+* ⭐ **Estrellas** por cada lectura.
+* 📚 **Cuadernos completados** por habilidad.
+* 🎖️ **Logros especiales** como “3 días seguidos leyendo”.
+
+---
+
+## 8. 🔄 **Ruta de Aprendizaje Adaptativa (Back-End)**
+
+La IA ajusta dinámicamente:
+
+* Dificultad de los textos.
+* Tipo de preguntas.
+* Longitud de actividades.
+* Enfoque en la habilidad más débil (por ejemplo, inferencias).
+
+---
+
+Si quieres, puedo ponerte esto en un **archivo .md**, mejorar el diseño visual, agregar emojis, o convertirlo en un **pitch deck**, **mapa mental**, **diagramas**, **user journeys** o **casos de uso**.

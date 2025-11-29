@@ -4,43 +4,62 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
-const signupSchema = z.object({
-  fullName: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres").max(50, "El nombre es muy largo"),
-  email: z.string().email("Correo electrónico inválido").max(255, "Correo electrónico muy largo"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").max(72, "La contraseña es muy larga"),
-  age: z.number().min(6, "La edad debe ser entre 6 y 9 años").max(9, "La edad debe ser entre 6 y 9 años")
-});
-
-const loginSchema = z.object({
-  email: z.string().email("Correo electrónico inválido").max(255, "Correo electrónico muy largo"),
-  password: z.string().min(1, "La contraseña es requerida").max(72, "La contraseña es muy larga")
+const userSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(2, "El nombre debe tener al menos 2 caracteres")
+    .max(50, "El nombre es muy largo"),
+  age: z
+    .number()
+    .min(6, "La edad debe ser entre 6 y 9 años")
+    .max(9, "La edad debe ser entre 6 y 9 años"),
 });
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Genera credenciales sintéticas (email y password) a partir de username + edad
+  const buildSyntheticCredentials = (
+    rawUsername: string,
+    rawAge: string | number
+  ) => {
+    const cleanedUsername = rawUsername
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ".");
+    const ageNum = typeof rawAge === "string" ? parseInt(rawAge) : rawAge;
+    const email = `${cleanedUsername}@gmail.com`;
+    const password = `${cleanedUsername}-${ageNum}-octavio`;
+    return { email, password, cleanedUsername, ageNum };
+  };
+
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/menu");
       }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
         navigate("/menu");
       }
     });
@@ -54,43 +73,47 @@ export default function Auth() {
 
     try {
       const ageNum = parseInt(age);
-      const validated = signupSchema.parse({
-        fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-        age: ageNum
+      const validated = userSchema.parse({
+        username: username.trim(),
+        age: ageNum,
       });
 
+      const { email, password } = buildSyntheticCredentials(
+        validated.username,
+        validated.age
+      );
+
       const { error } = await supabase.auth.signUp({
-        email: validated.email,
-        password: validated.password,
+        email,
+        password,
         options: {
           emailRedirectTo: `${window.location.origin}/menu`,
           data: {
-            full_name: validated.fullName,
-            age: validated.age
-          }
-        }
+            full_name: validated.username,
+            age: validated.age,
+          },
+        },
       });
 
       if (error) {
         if (error.message.includes("User already registered")) {
           toast({
-            title: "Usuario ya registrado",
-            description: "Este correo ya está registrado. Por favor inicia sesión.",
-            variant: "destructive"
+            title: "Usuario ya existe",
+            description: "Ese nombre ya está en uso. Intenta con otro.",
+            variant: "destructive",
           });
         } else {
           toast({
             title: "Error al registrarse",
             description: error.message,
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } else {
         toast({
           title: "¡Cuenta creada!",
-          description: "Tu cuenta ha sido creada exitosamente. Iniciando sesión...",
+          description:
+            "Tu cuenta ha sido creada exitosamente. Iniciando sesión...",
         });
       }
     } catch (error) {
@@ -98,13 +121,13 @@ export default function Auth() {
         toast({
           title: "Error de validación",
           description: error.errors[0].message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
           title: "Error",
           description: "Ocurrió un error inesperado",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } finally {
@@ -117,28 +140,34 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const validated = loginSchema.parse({
-        email: email.trim().toLowerCase(),
-        password
+      const ageNum = parseInt(age);
+      const validated = userSchema.parse({
+        username: username.trim(),
+        age: ageNum,
       });
 
+      const { email, password } = buildSyntheticCredentials(
+        validated.username,
+        validated.age
+      );
+
       const { error } = await supabase.auth.signInWithPassword({
-        email: validated.email,
-        password: validated.password
+        email,
+        password,
       });
 
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast({
-            title: "Credenciales incorrectas",
-            description: "El correo o la contraseña son incorrectos.",
-            variant: "destructive"
+            title: "Datos incorrectos",
+            description: "Nombre o edad incorrectos. Intenta de nuevo.",
+            variant: "destructive",
           });
         } else {
           toast({
             title: "Error al iniciar sesión",
             description: error.message,
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       }
@@ -147,13 +176,13 @@ export default function Auth() {
         toast({
           title: "Error de validación",
           description: error.errors[0].message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
           title: "Error",
           description: "Ocurrió un error inesperado",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } finally {
@@ -164,10 +193,10 @@ export default function Auth() {
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-gradient-tropical opacity-90" />
-      
-      <img 
-        src="/src/assets/octavio-waving.png" 
-        alt="Octavio saludando" 
+
+      <img
+        src="/src/assets/octavio-waving.png"
+        alt="Octavio saludando"
         className="absolute bottom-8 left-8 w-40 h-40 object-contain animate-float z-10 hidden md:block"
       />
 
@@ -177,88 +206,66 @@ export default function Auth() {
             {isLogin ? "¡Bienvenido de vuelta!" : "¡Únete a la aventura!"}
           </CardTitle>
           <CardDescription className="text-lg text-foreground/70 font-fredoka">
-            {isLogin ? "Inicia sesión para continuar aprendiendo" : "Crea tu cuenta para comenzar"}
+            {isLogin
+              ? "Inicia sesión para continuar aprendiendo"
+              : "Crea tu cuenta para comenzar"}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
-          <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-base font-fredoka text-foreground">
-                    Nombre completo
-                  </Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Tu nombre"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required={!isLogin}
-                    maxLength={50}
-                    className="border-2 border-accent/30 focus:border-accent font-fredoka text-base h-12"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="age" className="text-base font-fredoka text-foreground">
-                    Edad
-                  </Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    placeholder="6-9 años"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    required={!isLogin}
-                    min={6}
-                    max={9}
-                    className="border-2 border-accent/30 focus:border-accent font-fredoka text-base h-12"
-                  />
-                </div>
-              </>
-            )}
-
+          <form
+            onSubmit={isLogin ? handleLogin : handleSignup}
+            className="space-y-4"
+          >
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-base font-fredoka text-foreground">
-                Correo electrónico
+              <Label
+                htmlFor="username"
+                className="text-base font-fredoka text-foreground"
+              >
+                Nombre de usuario
               </Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="tu@correo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="Tu nombre"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
-                maxLength={255}
+                maxLength={50}
                 className="border-2 border-accent/30 focus:border-accent font-fredoka text-base h-12"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-base font-fredoka text-foreground">
-                Contraseña
+              <Label
+                htmlFor="age"
+                className="text-base font-fredoka text-foreground"
+              >
+                Edad
               </Label>
               <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="age"
+                type="number"
+                placeholder="6-9 años"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
                 required
-                maxLength={72}
-                minLength={6}
+                min={6}
+                max={9}
                 className="border-2 border-accent/30 focus:border-accent font-fredoka text-base h-12"
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-12 text-lg font-fredoka"
               disabled={loading}
             >
-              {loading ? "Cargando..." : isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
+              {loading
+                ? "Cargando..."
+                : isLogin
+                ? "Iniciar Sesión"
+                : "Crear Cuenta"}
             </Button>
 
             <div className="text-center">
@@ -267,7 +274,9 @@ export default function Auth() {
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-primary hover:text-primary/80 font-fredoka text-base underline"
               >
-                {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+                {isLogin
+                  ? "¿No tienes cuenta? Regístrate"
+                  : "¿Ya tienes cuenta? Inicia sesión"}
               </button>
             </div>
           </form>
