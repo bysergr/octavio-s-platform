@@ -99,10 +99,6 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
-    background-image: url('/src/assets/background-tropical.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
   }
 }
 
