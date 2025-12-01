@@ -22,8 +22,8 @@ const userSchema = z.object({
     .max(50, "El nombre es muy largo"),
   age: z
     .number()
-    .min(6, "La edad debe ser entre 6 y 9 años")
-    .max(9, "La edad debe ser entre 6 y 9 años"),
+    .min(4, "La edad debe ser entre 4 y 80 años")
+    .max(80, "La edad debe ser entre 4 y 80 años"),
 });
 
 export default function Auth() {
@@ -246,12 +246,12 @@ export default function Auth() {
               <Input
                 id="age"
                 type="number"
-                placeholder="6-9 años"
+                placeholder="4-80 años"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 required
-                min={6}
-                max={9}
+                min={4}
+                max={80}
                 className="border-2 border-accent/30 focus:border-accent font-fredoka text-base h-12"
               />
             </div>
