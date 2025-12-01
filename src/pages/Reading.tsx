@@ -79,7 +79,7 @@ const Reading = () => {
                 onClick={handleStart}
                 className="flex-1 h-14 text-xl font-black rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
               >
-                ¡Vamos! 🚀
+                ¡ Vamos ! 🚀
               </Button>
               <Button
                 onClick={() => navigate("/menu")}
@@ -314,7 +314,7 @@ const Reading = () => {
           <Button
             onClick={() => navigate("/menu")}
             variant="ghost"
-            className="text-primary hover:bg-primary/10 font-bold"
+            className="text-gray-700 hover:text-gray-600 text-lg hover:bg-transparent font-bold transition-all"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Volver al Menú

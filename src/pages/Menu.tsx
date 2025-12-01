@@ -15,7 +15,7 @@ const MISSIONS = [
     description: "Comprensión y Lectura Guiada",
     color: "from-primary to-primary/80",
     borderColor: "border-primary/40",
-    path: "/reading"
+    path: "/reading",
   },
   {
     id: "games",
@@ -24,7 +24,7 @@ const MISSIONS = [
     description: "Práctica de Habilidades Específicas",
     color: "from-secondary to-secondary/80",
     borderColor: "border-secondary/40",
-    path: "/games"
+    path: "/games",
   },
   {
     id: "daily",
@@ -33,7 +33,7 @@ const MISSIONS = [
     description: "Tarea diaria gamificada",
     color: "from-accent to-accent/80",
     borderColor: "border-accent/40",
-    path: "/daily-challenge"
+    path: "/daily-challenge",
   },
   {
     id: "progress",
@@ -42,8 +42,8 @@ const MISSIONS = [
     description: "Tu progreso y logros",
     color: "from-success to-success/80",
     borderColor: "border-success/40",
-    path: "/progress"
-  }
+    path: "/progress",
+  },
 ];
 
 const Menu = () => {
@@ -80,7 +80,7 @@ const Menu = () => {
       toast({
         title: "Error al cerrar sesión",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } else {
       navigate("/");
@@ -115,14 +115,14 @@ const Menu = () => {
 
           <div className="text-center">
             <div className="flex justify-center mb-4">
-              <img 
-                src={octavioWaving} 
-                alt="Octavio" 
+              <img
+                src={octavioWaving}
+                alt="Octavio"
                 className="w-32 h-32 md:w-40 md:h-40 animate-float drop-shadow-2xl"
               />
             </div>
-            
-            <Card className="inline-block bg-primary/10 border-4 border-primary/30 rounded-2xl p-6 backdrop-blur-sm">
+
+            <Card className="inline-block bg-primary/60 border-4 border-primary rounded-2xl p-6 backdrop-blur-sm">
               <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">
                 ¡Hola, {userName}! 🌟
               </h2>
@@ -141,8 +141,12 @@ const Menu = () => {
               <p className="font-bold text-lg text-foreground mb-1">
                 Recomendación de Hoy:
               </p>
-              <p className="text-foreground/80">
-                ¡Te recomiendo empezar con <span className="font-bold text-primary">Leer un Cuento Mágico</span> para practicar tu comprensión!
+              <p className="text-foreground/80 text-lg">
+                ¡Te recomiendo empezar con{" "}
+                <span className="font-bold text-gray-700">
+                  Leer un Cuento Mágico
+                </span>{" "}
+                para practicar tu comprensión!
               </p>
             </div>
           </div>
@@ -155,14 +159,16 @@ const Menu = () => {
             return (
               <Card
                 key={mission.id}
-                className={`bg-card/95 backdrop-blur-sm border-4 ${mission.borderColor} rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 cursor-pointer group transform hover:scale-105`}
+                className={`bg-card/95 backdrop-blur-sm border-4 ${mission.borderColor} rounded-3xl p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group transform hover:scale-105`}
                 onClick={() => navigate(mission.path)}
               >
                 <div className="space-y-4">
-                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${mission.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow`}>
+                  <div
+                    className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${mission.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow`}
+                  >
                     <Icon className="w-10 h-10 text-white" strokeWidth={3} />
                   </div>
-                  
+
                   <div>
                     <h3 className="text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors">
                       {mission.title}
@@ -173,7 +179,7 @@ const Menu = () => {
                   </div>
 
                   <Button
-                    className={`w-full h-12 text-lg font-black rounded-xl bg-gradient-to-r ${mission.color} hover:brightness-110 shadow-md transition-all border-2 border-white/30`}
+                    className={`w-full h-12 text-lg rounded-xl bg-gradient-to-r ${mission.color} hover:brightness-110 shadow-md transition-all border-2 border-white/30`}
                   >
                     ¡Empezar! →
                   </Button>
