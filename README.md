@@ -156,6 +156,3 @@ La IA ajusta dinámicamente:
 * Longitud de actividades.
 * Enfoque en la habilidad más débil (por ejemplo, inferencias).
 
----
-
-Si quieres, puedo ponerte esto en un **archivo .md**, mejorar el diseño visual, agregar emojis, o convertirlo en un **pitch deck**, **mapa mental**, **diagramas**, **user journeys** o **casos de uso**.
