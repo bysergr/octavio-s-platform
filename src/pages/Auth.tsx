@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import octavioWaving from "@/assets/octavio-waving.png";
 
 const userSchema = z.object({
   username: z
@@ -195,7 +196,7 @@ export default function Auth() {
       <div className="absolute inset-0 bg-gradient-tropical opacity-90" />
 
       <img
-        src="/src/assets/octavio-waving.png"
+        src={octavioWaving}
         alt="Octavio saludando"
         className="absolute bottom-8 left-8 w-40 h-40 object-contain animate-float z-10 hidden md:block"
       />
