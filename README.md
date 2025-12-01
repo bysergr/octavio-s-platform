@@ -1,10 +1,4 @@
-Aquí tienes **todo el texto completamente formateado en Markdown (MD)**, limpio, estructurado y listo para usar:
-
----
-
 # 📚 **Proyecto: Pilas con la Lectura**
-
-**Autor:** Octavio
 
 ## 📝 **Contexto**
 
