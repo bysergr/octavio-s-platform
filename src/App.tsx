@@ -12,6 +12,7 @@ import Progress from "./pages/Progress";
 import DailyChallenge from "./pages/DailyChallenge";
 import Games from "./pages/Games";
 import NotFound from "./pages/NotFound";
+import OctavioBubble from "./components/OctavioBubble";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <OctavioBubble />
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/auth" element={<Auth />} />
