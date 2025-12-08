@@ -6,7 +6,7 @@ export async function askTutor<T = unknown>(
   mode: TutorMode,
   payload: Record<string, unknown>
 ): Promise<T> {
-  const { data, error } = await supabase.functions.invoke("daily-challenge", {
+  const { data, error } = await supabase.functions.invoke("daily-challenge-two", {
     body: { mode, ...payload },
   });
   if (error) {
