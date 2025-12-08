@@ -214,6 +214,56 @@ export type Database = {
           },
         ]
       }
+      daily_challenges: {
+        Row: {
+          id: string
+          user_id: string
+          pillar: string
+          challenge_type: string
+          question: string
+          user_answer: string | null
+          stars: number
+          feedback: string | null
+          completed_at: string
+          challenge_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          pillar: string
+          challenge_type: string
+          question: string
+          user_answer?: string | null
+          stars: number
+          feedback?: string | null
+          completed_at?: string
+          challenge_date?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          pillar?: string
+          challenge_type?: string
+          question?: string
+          user_answer?: string | null
+          stars?: number
+          feedback?: string | null
+          completed_at?: string
+          challenge_date?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

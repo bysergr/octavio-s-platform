@@ -30,7 +30,7 @@ const MISSIONS = [
     id: "daily",
     icon: Target,
     title: "🎯 Reto Súper Secreto de Hoy",
-    description: "Tarea diaria gamificada",
+    description: "Tarea diaria",
     color: "from-accent to-accent/80",
     borderColor: "border-accent/40",
     path: "/daily-challenge",
