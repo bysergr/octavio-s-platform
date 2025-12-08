@@ -12,6 +12,8 @@ import {
 } from "@/integrations/ai/tutor";
 import { supabase } from "@/integrations/supabase/client";
 
+const MAX_CHALLENGES = 4;
+
 const DailyChallenge = () => {
   const navigate = useNavigate();
   const [challenge, setChallenge] = useState<DailyChallengeType | null>(null);
@@ -47,7 +49,7 @@ const DailyChallenge = () => {
         setCompletedToday(completedPillars);
         setChallengesToday(completedPillars.length);
 
-        if (completedPillars.length >= 5) {
+        if (completedPillars.length >= MAX_CHALLENGES) {
           setMaxChallengesReached(true);
           setLoading(false);
           return;
@@ -181,7 +183,7 @@ const DailyChallenge = () => {
       // Actualizar contador de challenges hoy
       setChallengesToday((prev) => prev + 1);
       setCompletedToday((prev) => [...prev, challenge.pillar]);
-      if (challengesToday + 1 >= 5) {
+      if (challengesToday + 1 >= MAX_CHALLENGES) {
         setMaxChallengesReached(true);
       }
     } catch (error) {
@@ -234,7 +236,7 @@ const DailyChallenge = () => {
               </h1>
             </div>
             <div className="text-sm text-muted-foreground font-bold">
-              {challengesToday}/5 completados hoy
+              {challengesToday}/{MAX_CHALLENGES} completados hoy
             </div>
           </div>
 
