@@ -427,10 +427,10 @@ const Reading = () => {
 
             <div className="space-y-4">
               <h2 className="text-3xl font-black text-primary">
-                Creando tu cuento mágico...
+                Buscando un cuento mágico...
               </h2>
               <p className="text-xl text-foreground/70">
-                ¡Estoy inventando una historia especial para ti!
+                ¡Estoy redactando una historia especial para ti!
               </p>
               <div className="flex justify-center">
                 <RefreshCw className="w-12 h-12 text-primary animate-spin" />

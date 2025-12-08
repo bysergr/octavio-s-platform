@@ -66,7 +66,7 @@ export async function generateQuestions(
   storyTitle: string
 ): Promise<QuestionsResponse> {
   try {
-    const { data, error } = await supabase.functions.invoke("story-generator", {
+    const { data, error } = await supabase.functions.invoke("books", {
       body: { mode: "generate-questions", story, storyTitle },
     });
 
@@ -116,7 +116,7 @@ export async function evaluateAnswer(
   pillar: string,
   correctAnswer?: string
 ): Promise<AnswerEvaluation> {
-  const { data, error } = await supabase.functions.invoke("story-generator", {
+  const { data, error } = await supabase.functions.invoke("books", {
     body: {
       mode: "evaluate-answer",
       question,
