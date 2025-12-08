@@ -74,6 +74,7 @@ const Reading = () => {
     useState<AnswerEvaluation | null>(null);
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [scoresSaved, setScoresSaved] = useState(false);
   const navigate = useNavigate();
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -136,6 +137,101 @@ const Reading = () => {
 
     loadUserAge();
   }, [navigate]);
+
+  // Guardar las estrellas en la base de datos cuando se completa la lectura
+  useEffect(() => {
+    const saveReadingScores = async () => {
+      if (
+        phase !== "complete" ||
+        scoresSaved ||
+        !story ||
+        results.length === 0
+      ) {
+        return;
+      }
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          console.error("Usuario no autenticado");
+          return;
+        }
+
+        // Guardar en reading_activities
+        const { error: activityError } = await supabase
+          .from("reading_activities")
+          .insert({
+            user_id: user.id,
+            story_title: story.title,
+            activity_type: "reading_comprehension",
+            completed: true,
+            score: totalStars,
+            time_spent_minutes: story.readingTimeMinutes || null,
+          });
+
+        if (activityError) {
+          console.error("Error guardando actividad de lectura:", activityError);
+        }
+
+        // Actualizar user_progress: incrementar stories_completed
+        const { data: progressData } = await supabase
+          .from("user_progress")
+          .select("stories_completed, total_reading_time_minutes")
+          .eq("user_id", user.id)
+          .single();
+
+        const newStoriesCompleted = (progressData?.stories_completed ?? 0) + 1;
+        const newTotalReadingTime =
+          (progressData?.total_reading_time_minutes ?? 0) +
+          (story.readingTimeMinutes || 0);
+
+        const { error: progressError } = await supabase
+          .from("user_progress")
+          .upsert(
+            {
+              user_id: user.id,
+              stories_completed: newStoriesCompleted,
+              total_reading_time_minutes: newTotalReadingTime,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: "user_id",
+            }
+          );
+
+        if (progressError) {
+          console.error("Error actualizando progreso:", progressError);
+        }
+
+        // Actualizar total_points en profiles (1 punto por estrella)
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("total_points")
+          .eq("id", user.id)
+          .single();
+
+        const newTotalPoints = (profileData?.total_points ?? 0) + totalStars;
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ total_points: newTotalPoints })
+          .eq("id", user.id);
+
+        if (profileError) {
+          console.error("Error actualizando puntos:", profileError);
+        }
+
+        setScoresSaved(true);
+      } catch (err) {
+        console.error("Error guardando puntuación de lectura:", err);
+      }
+    };
+
+    saveReadingScores();
+  }, [phase, scoresSaved, story, results, totalStars]);
 
   const handleStartReading = () => setPhase("reading");
 
@@ -315,6 +411,7 @@ const Reading = () => {
     setCurrentEvaluation(null);
     setResults([]);
     setError(null);
+    setScoresSaved(false);
 
     try {
       if (userAge) {
