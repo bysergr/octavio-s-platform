@@ -1,13 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
 type TutorMode = "hint" | "daily-challenge" | "riddle" | "feedback";
-type StoryMode = "generate-story" | "generate-questions" | "evaluate-answer";
 
 export async function askTutor<T = unknown>(
   mode: TutorMode,
   payload: Record<string, unknown>
 ): Promise<T> {
-  const { data, error } = await supabase.functions.invoke("tutor", {
+  const { data, error } = await supabase.functions.invoke("daily-challenge", {
     body: { mode, ...payload },
   });
   if (error) {
@@ -45,6 +44,26 @@ export interface QuestionsResponse {
 
 export interface AnswerEvaluation {
   isCorrect: boolean;
+  stars: number;
+  feedback: string;
+  explanation: string;
+  encouragement: string;
+}
+
+// Tipos para challenges diarios
+export interface DailyChallenge {
+  type: "multiple_choice" | "open_ended";
+  pillar: "interpretacion" | "inferencia" | "reflexion" | "argumentacion";
+  pillarName: string;
+  pillarEmoji: string;
+  question: string;
+  context?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation: string;
+}
+
+export interface ChallengeFeedback {
   stars: number;
   feedback: string;
   explanation: string;
