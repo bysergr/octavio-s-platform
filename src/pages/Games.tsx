@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,14 @@ import {
   BookOpen,
   ArrowUp,
   ArrowDown,
+  Loader2,
 } from "lucide-react";
 import { askGames } from "@/integrations/ai/games";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import octavioCelebrating from "@/assets/octavio-celebrating.png";
 import octavioThinking from "@/assets/octavio-thinking.png";
+import octavioWaving from "@/assets/octavio-waving.png";
 
 type GameType = "comprehension" | "sequence" | "vocabulary" | "inference";
 
@@ -46,6 +48,108 @@ type VocabularyExercise = {
   options: string[];
   correct: number;
   explanation: string;
+};
+
+type IconProps = { className?: string };
+type ActivityLoaderProps = {
+  title: string;
+  subtitle?: string;
+  lines?: number;
+  accent?: "primary" | "secondary" | "accent" | "success";
+  Icon?: ComponentType<IconProps>;
+  image?: "thinking" | "celebrating" | "waving";
+};
+
+const ActivityLoader = ({
+  title,
+  subtitle,
+  lines = 4,
+  accent = "primary",
+  Icon,
+  image = "waving",
+}: ActivityLoaderProps) => {
+  const theme =
+    accent === "primary"
+      ? {
+          from: "from-primary/20",
+          to: "to-secondary/20",
+          border: "border-primary/40",
+          text: "text-primary",
+        }
+      : accent === "secondary"
+      ? {
+          from: "from-secondary/20",
+          to: "to-accent/20",
+          border: "border-secondary/40",
+          text: "text-secondary",
+        }
+      : accent === "accent"
+      ? {
+          from: "from-accent/20",
+          to: "to-success/20",
+          border: "border-accent/40",
+          text: "text-accent",
+        }
+      : {
+          from: "from-success/20",
+          to: "to-primary/20",
+          border: "border-success/40",
+          text: "text-success",
+        };
+
+  const tipPool = [
+    "Consejo: relee y busca pistas en el texto.",
+    "Tip: piensa en el orden lógico de las acciones.",
+    "Pista: elige la palabra que mejor encaje en el contexto.",
+    "Consejo: deduce lo que no se dice de forma directa.",
+  ];
+  const tip = tipPool[Math.floor(Math.random() * tipPool.length)];
+
+  const imageSrc =
+    image === "thinking"
+      ? octavioThinking
+      : image === "celebrating"
+      ? octavioCelebrating
+      : octavioWaving;
+
+  return (
+    <div
+      className={`bg-gradient-to-br ${theme.from} ${theme.to} border-2 ${theme.border} rounded-2xl p-6 animate-pulse`}
+    >
+      <div className="flex items-center gap-4 mb-4">
+        <div className="relative">
+          <img
+            src={imageSrc}
+            alt="Octavio loader"
+            className="w-14 h-14 rounded-xl bg-white/70 border shadow-sm animate-float"
+          />
+          <Loader2
+            className={`absolute -bottom-2 -right-2 w-5 h-5 ${theme.text} animate-spin`}
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            {Icon ? <Icon className={`w-5 h-5 ${theme.text}`} /> : null}
+            <h3 className="text-lg font-extrabold text-foreground">{title}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {subtitle ?? "Generando actividad personalizada..."}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {[...Array(Math.max(1, lines)).keys()].map((i) => (
+          <Skeleton
+            key={i}
+            className={`h-${i === 0 ? "6" : "4"} w-${
+              i % 3 === 0 ? "full" : i % 3 === 1 ? "5/6" : "2/3"
+            }`}
+          />
+        ))}
+      </div>
+      <div className="mt-4 text-xs text-muted-foreground italic">{tip}</div>
+    </div>
+  );
 };
 
 const Games = () => {
@@ -800,11 +904,14 @@ const Games = () => {
                   </h2>
                 </div>
                 {comprehensionLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
+                  <ActivityLoader
+                    title="Preparando el texto..."
+                    subtitle="Estoy creando un cuento y preguntas a tu medida"
+                    lines={6}
+                    accent="primary"
+                    Icon={Brain}
+                    image="thinking"
+                  />
                 ) : comprehensionText ? (
                   <>
                     <div className="bg-white/80 rounded-xl p-6 mb-4 border-2 border-primary/30">
@@ -864,22 +971,39 @@ const Games = () => {
                             {comprehensionFeedback}
                           </div>
                         )}
-                        {!comprehensionLocked ? (
+                        <div className="mt-4 flex gap-3">
+                          {!comprehensionLocked ? (
+                            <Button
+                              onClick={handleComprehensionAnswer}
+                              disabled={selectedComprehensionAnswer === null}
+                              className="flex-1 text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
+                            >
+                              Verificar Respuesta
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={proceedAfterComprehensionWrong}
+                              className="flex-1 text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
+                            >
+                              Continuar
+                            </Button>
+                          )}
                           <Button
-                            onClick={handleComprehensionAnswer}
-                            disabled={selectedComprehensionAnswer === null}
-                            className="w-full text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
+                            onClick={() => {
+                              setCurrentQuestion(0);
+                              setSelectedComprehensionAnswer(null);
+                              setComprehensionFeedback(null);
+                              setComprehensionLocked(false);
+                              setComprehensionCompleted(false);
+                              generateComprehensionText();
+                            }}
+                            disabled={comprehensionLoading}
+                            variant="outline"
+                            className="flex-1 text-lg h-12"
                           >
-                            Verificar Respuesta
+                            Nuevo texto
                           </Button>
-                        ) : (
-                          <Button
-                            onClick={proceedAfterComprehensionWrong}
-                            className="w-full text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
-                          >
-                            Continuar
-                          </Button>
-                        )}
+                        </div>
                       </div>
                     )}
                   </>
@@ -897,12 +1021,14 @@ const Games = () => {
                   </h2>
                 </div>
                 {sequenceLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
+                  <ActivityLoader
+                    title="Generando la secuencia..."
+                    subtitle="Estoy creando pasos claros para ordenar"
+                    lines={5}
+                    accent="secondary"
+                    Icon={Puzzle}
+                    image="waving"
+                  />
                 ) : sequenceStory ? (
                   <div className="bg-white/80 rounded-xl p-6 mb-4 border-2 border-secondary/30">
                     <h3 className="text-xl font-bold text-foreground mb-4">
@@ -996,11 +1122,14 @@ const Games = () => {
                   </h2>
                 </div>
                 {vocabularyLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
+                  <ActivityLoader
+                    title="Creando el ejercicio de vocabulario..."
+                    subtitle="Estoy eligiendo palabras que encajen perfecto en contexto"
+                    lines={4}
+                    accent="accent"
+                    Icon={BookOpen}
+                    image="celebrating"
+                  />
                 ) : vocabularyExercise ? (
                   <div className="bg-white/80 rounded-xl p-6 mb-4 border-2 border-accent/30">
                     <p className="text-xl text-foreground mb-6 leading-relaxed">
@@ -1079,12 +1208,14 @@ const Games = () => {
                   </h2>
                 </div>
                 {inferenceLoading || !inferenceQuestion ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
+                  <ActivityLoader
+                    title="Pensando una pregunta de inferencia..."
+                    subtitle="Estoy armando una pregunta y opciones basadas en un mini texto"
+                    lines={5}
+                    accent="success"
+                    Icon={Zap}
+                    image="thinking"
+                  />
                 ) : (
                   <div className="space-y-4">
                     <div className="bg-white/80 rounded-xl p-6 border-2 border-success/30">
