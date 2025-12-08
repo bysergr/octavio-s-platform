@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { askTutor } from "@/integrations/ai/tutor";
+import { askOctavio } from "@/integrations/ai/octavio";
 import octavioWaving from "@/assets/octavio-waving.png";
 import octavioThinking from "@/assets/octavio-thinking.png";
 import octavioCelebrating from "@/assets/octavio-celebrating.png";
@@ -25,7 +25,8 @@ const OctavioBubble = () => {
     setAiLoading(true);
     setHintText(null);
     try {
-      const res = await askTutor<{ text: string }>("hint", {
+      const res = await askOctavio({
+        mode: "hint",
         story: storyInput,
         age: 8,
         level: 1,
