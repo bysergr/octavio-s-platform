@@ -17,8 +17,9 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { askTutor } from "@/integrations/ai/tutor";
+import { askGames } from "@/integrations/ai/games";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import octavioCelebrating from "@/assets/octavio-celebrating.png";
 import octavioThinking from "@/assets/octavio-thinking.png";
 
@@ -65,6 +66,7 @@ const Games = () => {
     string | null
   >(null);
   const [comprehensionCompleted, setComprehensionCompleted] = useState(false);
+  const [comprehensionLocked, setComprehensionLocked] = useState(false);
 
   // Secuencia de eventos state
   const [sequenceStory, setSequenceStory] = useState<SequenceStory | null>(
@@ -73,6 +75,7 @@ const Games = () => {
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [sequenceOrder, setSequenceOrder] = useState<number[]>([]);
   const [sequenceFeedback, setSequenceFeedback] = useState<string | null>(null);
+  const [sequenceLocked, setSequenceLocked] = useState(false);
 
   // Vocabulario state
   const [vocabularyExercise, setVocabularyExercise] =
@@ -82,6 +85,7 @@ const Games = () => {
     null
   );
   const [vocabFeedback, setVocabFeedback] = useState<string | null>(null);
+  const [vocabularyLocked, setVocabularyLocked] = useState(false);
 
   // Inferencia state
   const [inferenceQuestion, setInferenceQuestion] = useState<{
@@ -99,11 +103,12 @@ const Games = () => {
     null
   );
   const [inferenceLoading, setInferenceLoading] = useState(false);
+  const [inferenceLocked, setInferenceLocked] = useState(false);
 
   // AI section state
-  const [aiLoading, setAiLoading] = useState(false);
-  const [storyInput, setStoryInput] = useState("");
-  const [hintText, setHintText] = useState<string | null>(null);
+  const [_aiLoading, setAiLoading] = useState(false);
+  const [storyInput, _setStoryInput] = useState("");
+  const [_hintText, setHintText] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<{
     type: "multiple_choice";
     question: string;
@@ -112,7 +117,7 @@ const Games = () => {
     explanation: string;
   } | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [challengeFeedback, setChallengeFeedback] = useState<{
+  const [_challengeFeedback, setChallengeFeedback] = useState<{
     correct: boolean;
     message: string;
   } | null>(null);
@@ -137,7 +142,7 @@ const Games = () => {
   const generateComprehensionText = async () => {
     setComprehensionLoading(true);
     try {
-      const res = await askTutor<{
+      const res = await askGames<{
         text: {
           title: string;
           content: string;
@@ -225,13 +230,14 @@ const Games = () => {
       });
     } finally {
       setComprehensionLoading(false);
+      setComprehensionLocked(false);
     }
   };
 
   const generateSequenceStory = async () => {
     setSequenceLoading(true);
     try {
-      const res = await askTutor<{
+      const res = await askGames<{
         sequence: {
           title: string;
           events: string[];
@@ -289,13 +295,14 @@ const Games = () => {
       setSequenceOrder(shuffled);
     } finally {
       setSequenceLoading(false);
+      setSequenceLocked(false);
     }
   };
 
   const generateVocabularyExercise = async () => {
     setVocabularyLoading(true);
     try {
-      const res = await askTutor<{
+      const res = await askGames<{
         exercise: {
           sentence: string;
           options: string[];
@@ -339,10 +346,12 @@ const Games = () => {
       });
     } finally {
       setVocabularyLoading(false);
+      setVocabularyLocked(false);
     }
   };
 
   const moveSequenceItem = (index: number, direction: "up" | "down") => {
+    if (sequenceLocked) return;
     const newOrder = [...sequenceOrder];
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= newOrder.length) return;
@@ -364,6 +373,7 @@ const Games = () => {
       setSequenceFeedback(
         "Revisa el orden. Piensa en qué debe pasar primero y qué después."
       );
+      setSequenceLocked(true);
       toast({
         title: "Intenta de nuevo",
         description: "Piensa en el orden lógico de los eventos",
@@ -402,10 +412,27 @@ const Games = () => {
       }
     } else {
       setComprehensionFeedback("Piensa mejor. Relee el texto y busca pistas.");
+      setComprehensionLocked(true);
       toast({
         title: "Intenta de nuevo",
         description: "Vuelve a leer el texto cuidadosamente",
       });
+    }
+  };
+
+  const proceedAfterComprehensionWrong = () => {
+    if (!comprehensionText) return;
+    if (currentQuestion < comprehensionText.questions.length - 1) {
+      setCurrentQuestion((c) => c + 1);
+      setSelectedComprehensionAnswer(null);
+      setComprehensionFeedback(null);
+      setComprehensionLocked(false);
+    } else {
+      generateComprehensionText();
+      setCurrentQuestion(0);
+      setSelectedComprehensionAnswer(null);
+      setComprehensionFeedback(null);
+      setComprehensionLocked(false);
     }
   };
 
@@ -424,6 +451,7 @@ const Games = () => {
       }, 2000);
     } else {
       setVocabFeedback(`No es correcto. ${vocabularyExercise.explanation}`);
+      setVocabularyLocked(true);
       toast({
         title: "Intenta de nuevo",
         description: "Piensa en qué palabra tiene más sentido en el contexto",
@@ -434,30 +462,78 @@ const Games = () => {
   const generateInferenceQuestion = async () => {
     setInferenceLoading(true);
     try {
-      const res = await askTutor<{
-        challenge: {
+      const res = await askGames<{
+        challenge?: {
           type: "multiple_choice";
           question: string;
           options: string[];
           correctIndex: number;
           explanation: string;
         };
-        text: string;
+        text?:
+          | string
+          | {
+              content?: string;
+              questions?: Array<{
+                question: string;
+                options: string[];
+                correctIndex?: number;
+                explanation?: string;
+                skill?: string;
+              }>;
+            };
       }>("daily-challenge", {
-        story: "Un cuento sobre un niño que descubre algo mágico en su jardín",
+        // Pide explícitamente una pregunta de inferencia con mini texto para obtener { challenge, text }
+        story:
+          "Genera una pregunta de INFERENCIA de opción múltiple (3 opciones) con explicación breve, basada en un MINI TEXTO. Devuelve el formato de challenge con 'text' de contexto.",
         age: 8,
         level: 1,
       });
-      setInferenceQuestion({
-        text:
-          res.text ||
-          "Un niño encontró una planta especial que brillaba de noche.",
-        question: res.challenge.question,
-        options: res.challenge.options,
-        correct: res.challenge.correctIndex,
-        explanation: res.challenge.explanation,
-        skill: "Inferencia",
-      });
+      const data = res;
+      if (data?.challenge?.question) {
+        setInferenceQuestion({
+          text:
+            (typeof data?.text === "object"
+              ? data?.text?.content
+              : data?.text) ||
+            "Un niño encontró una planta especial que brillaba de noche.",
+          question: data.challenge.question,
+          options: data.challenge.options,
+          correct: data.challenge.correctIndex,
+          explanation: data.challenge.explanation,
+          skill: "Inferencia",
+        });
+        return;
+      }
+      // Si vino un objeto 'text' (fallback de la función) con preguntas, intenta extraer la de inferencia
+      const questions =
+        typeof data?.text === "object" ? data?.text?.questions : undefined;
+      if (Array.isArray(questions) && questions.length > 0) {
+        const inferQ =
+          questions.find(
+            (q) =>
+              typeof q?.skill === "string" &&
+              q.skill.toLowerCase().includes("infer")
+          ) || questions[0];
+        if (inferQ?.question && Array.isArray(inferQ?.options)) {
+          setInferenceQuestion({
+            text:
+              (typeof data?.text === "object" && data?.text?.content) ||
+              "Texto breve de contexto.",
+            question: inferQ.question,
+            options: inferQ.options,
+            correct:
+              typeof inferQ.correctIndex === "number" ? inferQ.correctIndex : 0,
+            explanation:
+              inferQ.explanation ||
+              "Piensa en lo que puedes deducir a partir de las pistas del texto.",
+            skill: "Inferencia",
+          });
+          return;
+        }
+      }
+      // Si nada de lo anterior aplica, cae al fallback local
+      throw new Error("Invalid response shape for inference");
     } catch {
       setInferenceQuestion({
         text: "Ana siempre leía antes de dormir. Sus libros favoritos eran de aventuras. Un día, su mamá le regaló un libro nuevo sobre piratas. Ana lo leyó en una sola noche porque le encantó tanto.",
@@ -474,6 +550,7 @@ const Games = () => {
       });
     } finally {
       setInferenceLoading(false);
+      setInferenceLocked(false);
     }
   };
 
@@ -491,6 +568,7 @@ const Games = () => {
       }, 3000);
     } else {
       setInferenceFeedback(`No es correcto. ${inferenceQuestion.explanation}`);
+      setInferenceLocked(true);
       toast({
         title: "Intenta de nuevo",
         description: "Piensa en qué información puedes deducir del texto",
@@ -505,17 +583,37 @@ const Games = () => {
       title: message,
       description: `+${points} puntos ⭐`,
     });
+    (async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("total_points")
+          .eq("id", user.id)
+          .single();
+        const newTotalPoints = (profile?.total_points ?? 0) + points;
+        await supabase
+          .from("profiles")
+          .update({ total_points: newTotalPoints })
+          .eq("id", user.id);
+      } catch {
+        // Ignored intentionally to not interrupt the UX
+      }
+    })();
     setTimeout(() => setShowConfetti(false), 2000);
   };
 
-  const askHint = async () => {
+  const _askHint = async () => {
     setAiLoading(true);
     setHintText(null);
     setChallenge(null);
     setSelectedOption(null);
     setChallengeFeedback(null);
     try {
-      const res = await askTutor<{ text: string }>("hint", {
+      const res = await askGames<{ text: string }>("hint", {
         story: storyInput,
         age: 8,
         level: 1,
@@ -528,14 +626,14 @@ const Games = () => {
     }
   };
 
-  const generateDailyChallenge = async () => {
+  const _generateDailyChallenge = async () => {
     setAiLoading(true);
     setHintText(null);
     setChallenge(null);
     setSelectedOption(null);
     setChallengeFeedback(null);
     try {
-      const res = await askTutor<{
+      const res = await askGames<{
         challenge: {
           type: "multiple_choice";
           question: string;
@@ -566,7 +664,7 @@ const Games = () => {
     }
   };
 
-  const submitChallengeAnswer = () => {
+  const _submitChallengeAnswer = () => {
     if (!challenge || selectedOption === null) return;
     const correct = selectedOption === challenge.correctIndex;
     setChallengeFeedback({
@@ -745,6 +843,7 @@ const Games = () => {
                                   ? "default"
                                   : "outline"
                               }
+                              disabled={comprehensionLocked}
                               onClick={() =>
                                 setSelectedComprehensionAnswer(idx)
                               }
@@ -765,13 +864,22 @@ const Games = () => {
                             {comprehensionFeedback}
                           </div>
                         )}
-                        <Button
-                          onClick={handleComprehensionAnswer}
-                          disabled={selectedComprehensionAnswer === null}
-                          className="w-full text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
-                        >
-                          Verificar Respuesta
-                        </Button>
+                        {!comprehensionLocked ? (
+                          <Button
+                            onClick={handleComprehensionAnswer}
+                            disabled={selectedComprehensionAnswer === null}
+                            className="w-full text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
+                          >
+                            Verificar Respuesta
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={proceedAfterComprehensionWrong}
+                            className="w-full text-lg h-12 bg-gradient-to-r from-primary to-primary/80"
+                          >
+                            Continuar
+                          </Button>
+                        )}
                       </div>
                     )}
                   </>
@@ -815,7 +923,7 @@ const Games = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => moveSequenceItem(idx, "up")}
-                              disabled={idx === 0}
+                              disabled={idx === 0 || sequenceLocked}
                               className="h-6 w-6 p-0"
                             >
                               <ArrowUp className="w-4 h-4" />
@@ -824,7 +932,10 @@ const Games = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => moveSequenceItem(idx, "down")}
-                              disabled={idx === sequenceOrder.length - 1}
+                              disabled={
+                                idx === sequenceOrder.length - 1 ||
+                                sequenceLocked
+                              }
                               className="h-6 w-6 p-0"
                             >
                               <ArrowDown className="w-4 h-4" />
@@ -855,6 +966,7 @@ const Games = () => {
                     <div className="mt-4 flex gap-3">
                       <Button
                         onClick={checkSequence}
+                        disabled={sequenceLocked}
                         className="flex-1 text-lg h-12 bg-gradient-to-r from-secondary to-secondary/80"
                       >
                         Verificar Orden
@@ -912,6 +1024,7 @@ const Games = () => {
                           variant={
                             selectedVocabOption === idx ? "default" : "outline"
                           }
+                          disabled={vocabularyLocked}
                           onClick={() => setSelectedVocabOption(idx)}
                           className="w-full text-lg h-16"
                         >
@@ -930,13 +1043,27 @@ const Games = () => {
                         {vocabFeedback}
                       </div>
                     )}
-                    <Button
-                      onClick={handleVocabularyAnswer}
-                      disabled={selectedVocabOption === null}
-                      className="w-full text-lg h-12 bg-gradient-to-r from-accent to-accent/80"
-                    >
-                      Verificar Respuesta
-                    </Button>
+                    {!vocabularyLocked ? (
+                      <Button
+                        onClick={handleVocabularyAnswer}
+                        disabled={selectedVocabOption === null}
+                        className="w-full text-lg h-12 bg-gradient-to-r from-accent to-accent/80"
+                      >
+                        Verificar Respuesta
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          setSelectedVocabOption(null);
+                          setVocabFeedback(null);
+                          setVocabularyLocked(false);
+                          generateVocabularyExercise();
+                        }}
+                        className="w-full text-lg h-12 bg-gradient-to-r from-accent to-accent/80"
+                      >
+                        Nuevo ejercicio
+                      </Button>
+                    )}
                   </div>
                 ) : null}
               </Card>
@@ -981,6 +1108,9 @@ const Games = () => {
                                 ? "default"
                                 : "outline"
                             }
+                            disabled={
+                              inferenceLocked || inferenceFeedback !== null
+                            }
                             onClick={() => setSelectedInferenceOption(idx)}
                             className="w-full text-left justify-start h-auto py-3 text-lg"
                           >
@@ -1003,12 +1133,27 @@ const Games = () => {
                         onClick={handleInferenceAnswer}
                         disabled={
                           selectedInferenceOption === null ||
-                          inferenceFeedback !== null
+                          inferenceFeedback !== null ||
+                          inferenceLocked
                         }
                         className="w-full text-lg h-12 bg-gradient-to-r from-success to-success/80"
                       >
                         Verificar Respuesta
                       </Button>
+                      {inferenceFeedback !== null && (
+                        <Button
+                          onClick={() => {
+                            generateInferenceQuestion();
+                            setSelectedInferenceOption(null);
+                            setInferenceFeedback(null);
+                            setInferenceLocked(false);
+                          }}
+                          variant="outline"
+                          className="w-full text-lg h-12 mt-3"
+                        >
+                          Nueva pregunta
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}

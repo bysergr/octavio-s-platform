@@ -46,16 +46,16 @@ const OctavioBubble = () => {
         <DialogTrigger asChild>
           <Button
             size="icon"
-            className="fixed bottom-6 right-6 h-20 w-20 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:brightness-110 z-50 group overflow-visible"
+            className="fixed bottom-6 right-6 h-20 w-20 rounded-full shadow-xl bg-gradient-to-br from-primary via-primary/90 to-secondary hover:brightness-110 z-50 group overflow-visible"
             aria-label="Habla con Octavio"
           >
             <span
               aria-hidden="true"
-              className="absolute -inset-1 rounded-full ring-2 ring-primary/30 animate-pulse pointer-events-none"
+              className="absolute -inset-1 rounded-full ring-2 ring-primary/40 animate-pulse pointer-events-none"
             />
             <span
               aria-hidden="true"
-              className="absolute inset-0 rounded-full bg-primary/30 blur-xl opacity-0 group-hover:opacity-60 transition-opacity"
+              className="absolute inset-0 rounded-full bg-primary/40 blur-xl opacity-0 group-hover:opacity-60 transition-opacity"
             />
             <img
               src={octavioWaving}
@@ -68,8 +68,8 @@ const OctavioBubble = () => {
             />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl border border-primary/20 bg-background/80 supports-[backdrop-filter]:bg-background/70 backdrop-blur shadow-2xl">
-          <DialogHeader className="p-4 pb-3 border-b bg-gradient-to-r from-primary/10 to-secondary/10">
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-b from-background/95 to-background/80 supports-[backdrop-filter]:bg-background/80 backdrop-blur-xl shadow-2xl">
+          <DialogHeader className="p-4 pb-3 border-b border-primary/20 bg-gradient-to-r from-primary/15 via-primary/10 to-secondary/15">
             <DialogTitle className="flex items-center justify-between">
               <span className="flex items-center gap-3">
                 <img
@@ -97,7 +97,7 @@ const OctavioBubble = () => {
               aria-live="polite"
             >
               {!aiLoading && !hintText && (
-                <div className="bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 rounded-2xl p-4">
+                <div className="bg-gradient-to-br from-primary/15 to-secondary/20 border border-primary/25 rounded-2xl p-4">
                   <div className="flex items-start gap-3">
                     <img
                       src={octavioWaving}
@@ -113,7 +113,7 @@ const OctavioBubble = () => {
               )}
 
               {aiLoading && (
-                <div className="bg-primary/10 border border-primary/30 rounded-2xl p-4 shadow-sm">
+                <div className="bg-muted/30 border border-primary/30 rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-3">
                     <img
                       src={octavioThinking}
@@ -134,7 +134,7 @@ const OctavioBubble = () => {
               )}
 
               {hintText && (
-                <div className="bg-gradient-to-br from-primary/15 to-secondary/15 border border-primary/30 rounded-2xl p-4 shadow">
+                <div className="bg-gradient-to-br from-primary/20 to-secondary/25 border border-primary/35 rounded-2xl p-4 shadow">
                   <div className="flex items-start gap-3">
                     <img
                       src={octavioCelebrating}
@@ -159,7 +159,7 @@ const OctavioBubble = () => {
                 <button
                   type="button"
                   onClick={() => setStoryInput("¿Cuál es la idea principal?")}
-                  className="px-3 py-1.5 rounded-full text-xs bg-primary/10 hover:bg-primary/20 border border-primary/20 transition"
+                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
                 >
                   ¿Idea principal?
                 </button>
@@ -168,7 +168,7 @@ const OctavioBubble = () => {
                   onClick={() =>
                     setStoryInput("Explícame con un ejemplo sencillo")
                   }
-                  className="px-3 py-1.5 rounded-full text-xs bg-primary/10 hover:bg-primary/20 border border-primary/20 transition"
+                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
                 >
                   Ejemplo
                 </button>
@@ -177,13 +177,13 @@ const OctavioBubble = () => {
                   onClick={() =>
                     setStoryInput("Dame una pista para resolverlo")
                   }
-                  className="px-3 py-1.5 rounded-full text-xs bg-primary/10 hover:bg-primary/20 border border-primary/20 transition"
+                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
                 >
                   Pista
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-primary/30 bg-background/80 supports-[backdrop-filter]:bg-background/70 backdrop-blur p-2 transition focus-within:ring-2 focus-within:ring-primary/40">
+              <div className="rounded-2xl border border-primary/40 bg-background/85 supports-[backdrop-filter]:bg-background/75 backdrop-blur-xl p-2 transition focus-within:ring-2 focus-within:ring-primary/50">
                 <textarea
                   value={storyInput}
                   onChange={(e) => setStoryInput(e.target.value)}
@@ -195,7 +195,7 @@ const OctavioBubble = () => {
                   <Button
                     onClick={askHint}
                     disabled={aiLoading || !storyInput.trim()}
-                    className="h-11 bg-gradient-to-r from-primary to-primary/80 hover:brightness-110 shadow-md"
+                    className="h-11 bg-gradient-to-r from-primary/90 via-primary to-secondary/90 hover:brightness-110 shadow-md focus-visible:ring-2 focus-visible:ring-primary/50"
                   >
                     {aiLoading ? "🤔 Pensando..." : "💭 Preguntar a Octavio"}
                   </Button>
