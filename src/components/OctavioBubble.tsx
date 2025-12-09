@@ -106,7 +106,7 @@ const OctavioBubble = () => {
                       className="w-9 h-9"
                     />
                     <div className="text-sm text-muted-foreground">
-                      Escribe tu pregunta arriba. Consejos: sé específico,
+                      Escribe tu pregunta para Octavio. Consejos: sé específico,
                       menciona el tema y pide un ejemplo.
                     </div>
                   </div>
@@ -156,34 +156,6 @@ const OctavioBubble = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setStoryInput("¿Cuál es la idea principal?")}
-                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
-                >
-                  ¿Idea principal?
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setStoryInput("Explícame con un ejemplo sencillo")
-                  }
-                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
-                >
-                  Ejemplo
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setStoryInput("Dame una pista para resolverlo")
-                  }
-                  className="px-3 py-1.5 rounded-full text-xs bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 transition"
-                >
-                  Pista
-                </button>
-              </div>
-
               <div className="rounded-2xl border border-primary/40 bg-background/85 supports-[backdrop-filter]:bg-background/75 backdrop-blur-xl p-2 transition focus-within:ring-2 focus-within:ring-primary/50">
                 <textarea
                   value={storyInput}
